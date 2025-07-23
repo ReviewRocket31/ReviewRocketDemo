@@ -105,30 +105,29 @@
             
               const text = document.getElementById('feedback').value.trim();
             
-              // Build payload
+              // ── build the payload we’ll POST ───────────────────────────────
+              const visitorName  = urlParams.get('name')  || sessionStorage.getItem('rr_name')  || '';
+              const visitorEmail = urlParams.get('email') || sessionStorage.getItem('rr_email') || '';
+            
               const leadData = {
-                source: 'feedback',            // ← identifies this page
+                source:   'feedback',      // identifies this page
+                name:     visitorName,     // NEW
+                email:    visitorEmail,    // NEW
                 feedback: text,
                 timestamp: new Date().toISOString(),
-                demoData: {
-                  originalName: sessionStorage.getItem('rr_name') || '',
-                  originalEmail: sessionStorage.getItem('rr_email') || ''
-                }
               };
             
               try {
                 const res = await fetch(config.leadCaptureUrl, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(leadData)
+                  body: JSON.stringify(leadData),
                 });
-            
                 if (!res.ok) throw new Error(res.status);
-            
                 console.log('Feedback sent', await res.json());
               } catch (err) {
                 console.error('Failed to send feedback:', err);
-                // We’ll still show success so the visitor isn’t stuck
+                // still show success so the visitor isn't stuck
               }
             
               // Show success message regardless
