@@ -100,13 +100,42 @@
             }
 
             // Handle form submission
-            document.getElementById('feedback-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                // Show success message
-                document.getElementById('feedback-form').style.display = 'none';
-                document.getElementById('success-message').style.display = 'block';
+            document.getElementById('feedback-form').addEventListener('submit', async (e) => {
+              e.preventDefault();
+            
+              const text = document.getElementById('feedback').value.trim();
+            
+              // Build payload
+              const leadData = {
+                source: 'feedback',            // ← identifies this page
+                feedback: text,
+                timestamp: new Date().toISOString(),
+                demoData: {
+                  originalName: sessionStorage.getItem('rr_name') || '',
+                  originalEmail: sessionStorage.getItem('rr_email') || ''
+                }
+              };
+            
+              try {
+                const res = await fetch(config.leadCaptureUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(leadData)
+                });
+            
+                if (!res.ok) throw new Error(res.status);
+            
+                console.log('Feedback sent', await res.json());
+              } catch (err) {
+                console.error('Failed to send feedback:', err);
+                // We’ll still show success so the visitor isn’t stuck
+              }
+            
+              // Show success message regardless
+              document.getElementById('feedback-form').style.display = 'none';
+              document.getElementById('success-message').style.display = 'block';
             });
+
         });
     </script>
 </body>
