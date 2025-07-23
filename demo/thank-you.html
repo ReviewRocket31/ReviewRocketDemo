@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You - Review Rocket Demo</title>
+    <link rel="stylesheet" href="src/ui.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img id="logo" src="public/logo.svg" alt="Business Logo" class="logo">
+            <h1 id="high-header" class="headline">Thanks for the Kind Words!</h1>
+            <p id="high-body" class="subhead">Would you be willing to leave this review on our public profile?</p>
+        </header>
+
+        <main class="main">
+            <div class="user-info" id="user-info" style="display: none;">
+                <p class="user-greeting">Hi <span id="user-name"></span>!</p>
+                <p class="rating-display">You gave us <span id="user-rating"></span> stars ⭐</p>
+            </div>
+
+            <div class="form">
+                <button type="button" id="review-btn" class="btn btn-primary btn-large">
+                    Leave a Google Review
+                </button>
+
+                <div id="redirect-message" class="redirect-message" style="display: none;">
+                    <p>Redirecting to Google Reviews...</p>
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="index.html" class="link">← Start over</a>
+            </div>
+        </main>
+
+        <!-- CTA Panel -->
+        <div class="cta-panel" id="cta-panel">
+            <div class="cta-content">
+                <h3 id="cta-headline" class="cta-headline">Want this system running for your business?</h3>
+                <p id="cta-subhead" class="cta-subhead">Get Review Rocket set up in minutes and start collecting customer feedback automatically.</p>
+                <a href="#" id="cta-link" class="btn btn-cta" target="_blank">Get Started Today</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { config } from './src/config.js';
+
+        // Load configuration
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply branding
+            document.getElementById('high-header').textContent = config.texts.highHeader;
+            document.getElementById('high-body').textContent = config.texts.highBody;
+            document.getElementById('review-btn').textContent = config.texts.highCta;
+            document.getElementById('logo').src = config.logoPath;
+            
+            // Set CSS custom properties
+            document.documentElement.style.setProperty('--primary-color', config.primaryColor);
+
+            // Configure CTA panel
+            if (config.flags.showCTA) {
+                document.getElementById('cta-headline').textContent = config.cta.headline;
+                document.getElementById('cta-subhead').textContent = config.cta.subhead;
+                document.getElementById('cta-link').textContent = config.cta.button;
+                
+                // Build CTA link with prefilled data for lead form
+                const storedName = sessionStorage.getItem('rr_name') || '';
+                const storedEmail = sessionStorage.getItem('rr_email') || '';
+                
+                // Create query parameters for prefilling lead form
+                const params = new URLSearchParams();
+                if (storedName) params.set('name', storedName);
+                if (storedEmail) params.set('email', storedEmail);
+                params.set('source', 'thank_you_page');
+                
+                const finalUrl = params.toString() ? 
+                  `${config.cta.link}?${params.toString()}` : 
+                  config.cta.link;
+                
+                document.getElementById('cta-link').href = finalUrl;
+            } else {
+                document.getElementById('cta-panel').style.display = 'none';
+            }
+
+            // Handle query parameters to show user info
+            const urlParams = new URLSearchParams(window.location.search);
+            const userName = urlParams.get('name');
+            const userEmail = urlParams.get('email');
+            const rating = urlParams.get('rating');
+
+            if (userName || rating) {
+                if (userName) {
+                    document.getElementById('user-name').textContent = userName;
+                }
+                if (rating) {
+                    document.getElementById('user-rating').textContent = rating;
+                }
+                document.getElementById('user-info').style.display = 'block';
+            }
+
+            // Handle review button click
+            document.getElementById('review-btn').addEventListener('click', () => {
+                const reviewBtn = document.getElementById('review-btn');
+                const redirectMessage = document.getElementById('redirect-message');
+                
+                // Show loading state
+                reviewBtn.style.display = 'none';
+                redirectMessage.style.display = 'block';
+                
+                // Simulate redirect delay
+                setTimeout(() => {
+                    window.location.href = config.publicReviewUrl;
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>

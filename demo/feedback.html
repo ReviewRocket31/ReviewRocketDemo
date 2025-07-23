@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - Review Rocket Demo</title>
+    <link rel="stylesheet" href="src/ui.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img id="logo" src="public/logo.svg" alt="Business Logo" class="logo">
+            <h1 id="low-header" class="headline">We're Sorry to Hear That…</h1>
+            <p id="low-body" class="subhead">Help us make things right. Tell us how we can improve.</p>
+        </header>
+
+        <main class="main">
+            <div class="user-info" id="user-info" style="display: none;">
+                <p class="user-greeting">Hi <span id="user-name"></span>!</p>
+            </div>
+
+            <form id="feedback-form" class="form">
+                <div class="form-group">
+                    <label for="feedback" class="label">How can we improve? (Optional)</label>
+                    <textarea id="feedback" name="feedback" class="textarea" rows="4" placeholder="Tell us what went wrong and how we can make it better..."></textarea>
+                </div>
+
+                <button type="submit" id="feedback-submit" class="btn btn-primary">
+                    Send Feedback
+                </button>
+            </form>
+
+            <div id="success-message" class="success-message" style="display: none;">
+                <p>✓ Thanks! We'll be in touch soon to make things right.</p>
+            </div>
+
+            <div class="actions">
+                <a href="index.html" class="link">← Try rating us again</a>
+            </div>
+        </main>
+
+        <!-- CTA Panel -->
+        <div class="cta-panel" id="cta-panel">
+            <div class="cta-content">
+                <h3 id="cta-headline" class="cta-headline">Want this system running for your business?</h3>
+                <p id="cta-subhead" class="cta-subhead">Get Review Rocket set up in minutes and start collecting customer feedback automatically.</p>
+                <a href="#" id="cta-link" class="btn btn-cta" target="_blank">Get Started Today</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { config } from './src/config.js';
+
+        // Load configuration
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply branding
+            document.getElementById('low-header').textContent = config.texts.lowHeader;
+            document.getElementById('low-body').textContent = config.texts.lowBody;
+            document.getElementById('feedback-submit').textContent = config.texts.lowSubmit;
+            document.getElementById('logo').src = config.logoPath;
+            
+            // Set CSS custom properties
+            document.documentElement.style.setProperty('--primary-color', config.primaryColor);
+
+            // Configure CTA panel
+            if (config.flags.showCTA) {
+                document.getElementById('cta-headline').textContent = config.cta.headline;
+                document.getElementById('cta-subhead').textContent = config.cta.subhead;
+                document.getElementById('cta-link').textContent = config.cta.button;
+                
+                // Build CTA link with prefilled data for lead form
+                const storedName = sessionStorage.getItem('rr_name') || '';
+                const storedEmail = sessionStorage.getItem('rr_email') || '';
+                
+                // Create query parameters for prefilling lead form
+                const params = new URLSearchParams();
+                if (storedName) params.set('name', storedName);
+                if (storedEmail) params.set('email', storedEmail);
+                params.set('source', 'feedback_page');
+                
+                const finalUrl = params.toString() ? 
+                  `${config.cta.link}?${params.toString()}` : 
+                  config.cta.link;
+                
+                document.getElementById('cta-link').href = finalUrl;
+            } else {
+                document.getElementById('cta-panel').style.display = 'none';
+            }
+
+            // Handle query parameters to show user info
+            const urlParams = new URLSearchParams(window.location.search);
+            const userName = urlParams.get('name');
+            const userEmail = urlParams.get('email');
+            const rating = urlParams.get('rating');
+
+            if (userName) {
+                document.getElementById('user-name').textContent = userName;
+                document.getElementById('user-info').style.display = 'block';
+            }
+
+            // Handle form submission
+            document.getElementById('feedback-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Show success message
+                document.getElementById('feedback-form').style.display = 'none';
+                document.getElementById('success-message').style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
